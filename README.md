@@ -13,6 +13,11 @@ the S&P 500. No real money is ever involved.
 - **Earnings avoidance** - holdings are exited and buys skipped within 3 trading days of earnings (`EARNINGS_EXIT_DAYS`).
 - **Monitoring** - Prometheus metrics and a provisioned Grafana dashboard.
 
+## Dashboard Preview
+
+![Dashboard Top](dashboard1.png)
+![Dashboard Bottom](dashboard2.png)
+
 ## Architecture
 
 | Component | File | Role |
