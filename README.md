@@ -58,5 +58,4 @@ Educational paper-trading software. Not financial advice.
 
 ## License
 
-No license has been chosen yet. The [MIT License](https://choosealicense.com/licenses/mit/)
-is suggested for a student project; add a `LICENSE` file before accepting contributions.
+MIT License. See [LICENSE](LICENSE).
