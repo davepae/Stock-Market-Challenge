@@ -3,7 +3,7 @@
 An autonomous **mock stock trading portfolio manager**. It starts with $50,000 of
 paper money, trades a core universe (SPY, AAPL, MSFT, GOOGL, AMZN, META, NVDA,
 TSLA) plus a small daily watchlist found by headline scanning, and tries to beat
-both the other contestants and the S&P 500. No real money is ever involved.
+the S&P 500. No real money is ever involved.
 
 ## Features
 
