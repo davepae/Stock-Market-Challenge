@@ -138,7 +138,7 @@
               },
               {
                 "color": "yellow",
-                "value": 50000
+                "value": 5000000
               },
               {
                 "color": "green",
@@ -287,7 +287,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "portfolio_value - 50000",
+          "expr": "portfolio_value - 5000000",
           "refId": "B",
           "legendFormat": "P&L $"
         }
@@ -954,7 +954,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "vector(50000)",
+          "expr": "vector(5000000)",
           "refId": "B",
           "legendFormat": "$50K Baseline"
         }

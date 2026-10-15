@@ -1,6 +1,6 @@
 # Mock Stock Challenge (student edition)
 
-Long-only paper-trading app. Starting cash $50,000.
+Long-only paper-trading app. Starting cash $5,000,000.
 Platform: Raspberry Pi OS / Debian only. Code lives in `~/stocks_challenge/`.
 
 ## Layout

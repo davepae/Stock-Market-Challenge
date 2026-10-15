@@ -1,11 +1,13 @@
 # Stock-Market-Challenge
 
-An autonomous **mock stock trading portfolio manager**. It starts with $50,000 of
+An autonomous **mock stock trading portfolio manager**. It starts with $5,000,000 of
 paper money, trades a core universe (SPY, AAPL, MSFT, GOOGL, AMZN, META, NVDA,
 TSLA) plus a small daily watchlist found by headline scanning, and tries to beat
 the S&P 500. No real money is ever involved.
 
 ## Features
+
+> **Starting budget:** $5,000,000 (updated from $50,000).
 
 - **News monitoring** - headline scanning and sentiment scoring, cached locally.
 - **Technical analysis** - moving averages, RSI, momentum and relative strength vs. SPY (via yfinance).

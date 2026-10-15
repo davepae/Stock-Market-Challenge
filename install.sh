@@ -119,5 +119,5 @@ Next steps:
                           python log_trade.py AAPL BUY 10 200.00
   3. Run a cycle:         python trading_cycle.py
   4. Schedule cycles with cron (see SETUP.md > Scheduling).
-Checklist: ./verify.sh all PASS; dashboard loads; /portfolio shows cash 50000.
+Checklist: ./verify.sh all PASS; dashboard loads; /portfolio shows cash 5000000.
 MSG

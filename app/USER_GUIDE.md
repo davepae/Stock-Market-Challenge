@@ -1,7 +1,7 @@
 # Mock Stock Challenge — User Guide
 
 An automated, long-only portfolio manager for a mock stock contest.
-It starts with $50,000, trades 8 core tickers
+It starts with $5,000,000, trades 8 core tickers
 (SPY, AAPL, MSFT, GOOGL, AMZN, META, NVDA, TSLA) plus up to 5 watchlist
 names found by a headline scan, and ranks candidates by 20-day relative
 strength against the S&P 500 (SPY).

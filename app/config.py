@@ -16,7 +16,7 @@ SHARE_DECIMALS: int = 4                      # fractional share precision
 MIN_TRADE_VALUE: float = 250                 # skip buys smaller than this (USD)
 
 # --- Portfolio -------------------------------------------------------------
-INITIAL_CASH: float = 50000
+INITIAL_CASH: float = 5000000
 PORTFOLIO_EXPORTER_PORT: int = int(os.environ.get("STOCKS_EXPORTER_PORT", 8081))
 PORTFOLIO_EXPORTER_URL: str = f"http://localhost:{PORTFOLIO_EXPORTER_PORT}"
 TRADES_CSV: str = os.environ.get(

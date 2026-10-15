@@ -63,7 +63,7 @@ mkdir -p ~/.hermes/cache/stocks/news
 cp student_distro/student_trades.csv ~/.hermes/cache/stocks/trades.csv   # header only
 ```
 `trades.csv` columns: `date,ticker,action,shares,price`. The portfolio
-(starting cash $50,000) is rebuilt from this file. Always add trades with
+(starting cash $5,000,000) is rebuilt from this file. Always add trades with
 `python log_trade.py TICKER BUY|SELL SHARES PRICE`, which validates them.
 
 ## 7. Prometheus and Grafana configuration (manual)
@@ -99,7 +99,7 @@ Without systemd you can run the exporter in a terminal:
 ```
 Every line should say `PASS`. By hand:
 ```bash
-curl -s localhost:8081/portfolio | jq        # cash 50000 on a fresh install
+curl -s localhost:8081/portfolio | jq        # cash 5000000 on a fresh install
 curl -s localhost:8081/metrics | head
 curl -s localhost:9090/api/v1/targets | jq '.data.activeTargets[].health'
 ```
