@@ -1816,34 +1816,6 @@
         }
       ],
       "description": "Number of trades executed so far."
-    },
-    {
-      "type": "row",
-      "title": "Strategy & Key Dates",
-      "id": 20,
-      "collapsed": false,
-      "panels": [],
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 41
-      }
-    },
-    {
-      "type": "text",
-      "title": "Strategy Playbook",
-      "id": 21,
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 42
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "**Earnings avoidance:** exit holdings and skip buys within 3 trading days of earnings.\n\n**Trailing stop:** arms at +5% P&L, trails 8% below the peak\n"
-      }
     }
   ],
   "id": null
