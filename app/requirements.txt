@@ -1,0 +1,4 @@
+flask
+yfinance
+requests
+prometheus_client

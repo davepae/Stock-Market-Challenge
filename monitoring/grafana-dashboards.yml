@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: stocks
+    folder: ''
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/stocks

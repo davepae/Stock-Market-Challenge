@@ -1,0 +1,1850 @@
+{
+  "uid": "mock-stock-challenge",
+  "title": "Mock Stock Challenge",
+  "tags": [
+    "mock-stock",
+    "challenge"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 39,
+  "version": 4,
+  "refresh": "30s",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "liveNow": false,
+  "templating": {
+    "list": [
+      {
+        "name": "ticker",
+        "label": "Ticker",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "ag164tx65ph4wd"
+        },
+        "definition": "query_result({__name__=~\"holding_.+_shares\"})",
+        "query": {
+          "qryType": 3,
+          "query": "query_result({__name__=~\"holding_.+_shares\"})",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "regex": "/holding_([a-z0-9]+)_shares/",
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "orange",
+        "name": "Earnings",
+        "target": {
+          "type": "tags",
+          "tags": [
+            "mock-stock-earnings"
+          ],
+          "limit": 100,
+          "matchAny": true
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Portfolio Overview",
+      "id": 1,
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Portfolio Total",
+      "id": 2,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50000
+              },
+              {
+                "color": "green",
+                "value": 55000
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_value",
+          "refId": "A",
+          "legendFormat": "Total"
+        }
+      ],
+      "description": "Total portfolio value. Green > $55K, yellow $50\u201355K, red < $50K."
+    },
+    {
+      "type": "stat",
+      "title": "ROI",
+      "id": 3,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P&L $"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 0
+                    },
+                    {
+                      "color": "green",
+                      "value": 2500.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_roi",
+          "refId": "A",
+          "legendFormat": "ROI %"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_value - 50000",
+          "refId": "B",
+          "legendFormat": "P&L $"
+        }
+      ],
+      "description": "Return vs. $50K starting cash, as a percent and in dollars. Green > 5%, yellow 0\u20135%, red < 0%."
+    },
+    {
+      "type": "stat",
+      "title": "Cash",
+      "id": 4,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_cash",
+          "refId": "A",
+          "legendFormat": "Cash"
+        }
+      ],
+      "description": "Uninvested cash."
+    },
+    {
+      "type": "stat",
+      "title": "Holdings Value",
+      "id": 5,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_holdings_value",
+          "refId": "A",
+          "legendFormat": "Holdings"
+        }
+      ],
+      "description": "Market value of all open positions."
+    },
+    {
+      "type": "row",
+      "title": "Holdings",
+      "id": 8,
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      }
+    },
+    {
+      "type": "table",
+      "title": "Holdings",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "inspect": false,
+            "cellOptions": {
+              "type": "auto"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Shares"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Entry Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current Value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P&L %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Peak Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trailing Stop"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rel Strength"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ticker"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P&L %"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rel Strength"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trailing Stop"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "Not armed",
+                        "color": "text",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "md",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Rel Strength",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\"))",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\")))",
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\"))",
+          "refId": "D",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) - sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\"))) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\")) * 100)",
+          "refId": "E",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_peak_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_peak_price\"))",
+          "refId": "F",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))",
+          "refId": "G",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_rel_strength\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_rel_strength\"))",
+          "refId": "H",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "ticker": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5,
+              "Value #F": 6,
+              "Value #G": 7,
+              "Value #H": 8
+            },
+            "renameByName": {
+              "ticker": "Ticker",
+              "Value #A": "Shares",
+              "Value #B": "Entry Price",
+              "Value #C": "Current Price",
+              "Value #D": "Current Value",
+              "Value #E": "P&L %",
+              "Value #F": "Peak Price",
+              "Value #G": "Trailing Stop",
+              "Value #H": "Rel Strength"
+            }
+          }
+        }
+      ],
+      "description": "Open positions, sorted by relative strength vs. SPY (20-day return difference). Current price = value \u00f7 shares."
+    },
+    {
+      "type": "row",
+      "title": "Performance",
+      "id": 10,
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Portfolio Equity Curve",
+      "id": 11,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "description": "Total portfolio value against the $50K starting baseline. Earnings dates are shown as annotations.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "$50K Baseline"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_value",
+          "refId": "A",
+          "legendFormat": "Portfolio"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "vector(50000)",
+          "refId": "B",
+          "legendFormat": "$50K Baseline"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Price Drill-down (vs SPY)",
+      "id": 12,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "description": "Live prices for the tickers chosen in the Ticker variable, with SPY always shown as the benchmark.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SPY"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "stock_price{ticker=~\"(?i)(${ticker:pipe}|spy)\"}",
+          "refId": "A",
+          "legendFormat": "{{ticker}}"
+        }
+      ],
+      "transformations": []
+    },
+    {
+      "type": "piechart",
+      "title": "Holdings Breakdown",
+      "id": 13,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "description": "How the portfolio is split across positions and cash.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\"))",
+          "refId": "A",
+          "legendFormat": "{{ticker}}",
+          "instant": true,
+          "range": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_cash",
+          "refId": "B",
+          "legendFormat": "cash",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Relative Strength vs SPY",
+      "id": 14,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "description": "20-day return minus SPY's 20-day return, strongest first.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "min": -10,
+          "max": 10,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 3
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "showUnfilled": true,
+        "namePlacement": "left",
+        "sizing": "auto",
+        "minVizHeight": 16,
+        "maxVizHeight": 40,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sort_desc(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_rel_strength\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_rel_strength\")))",
+          "refId": "A",
+          "legendFormat": "{{ticker}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Risk Monitoring",
+      "id": 15,
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      }
+    },
+    {
+      "type": "table",
+      "title": "Trailing Stop Status",
+      "id": 16,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 0,
+        "y": 33
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "inspect": false,
+            "cellOptions": {
+              "type": "auto"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Peak"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stop"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Room to Stop"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ticker"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Room to Stop"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 2
+                    },
+                    {
+                      "color": "green",
+                      "value": 5
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "-1": {
+                        "text": "Not armed",
+                        "color": "transparent",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stop"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "\u2014",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "md",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Room to Stop",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\")))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_peak_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_peak_price\"))",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))",
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "((((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) - sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))) / (sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) * 100) and (sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\")) > 0)) or ((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) * 0 - 1)",
+          "refId": "D",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "ticker": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4
+            },
+            "renameByName": {
+              "ticker": "Ticker",
+              "Value #A": "Price",
+              "Value #B": "Peak",
+              "Value #C": "Stop",
+              "Value #D": "Room to Stop"
+            }
+          }
+        }
+      ],
+      "description": "How far each price sits above its trailing stop. Red within 2%, orange within 5%. The stop arms once P&L reaches +5% and sits 8% below the peak."
+    },
+    {
+      "type": "table",
+      "title": "Recent Trades",
+      "id": 17,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 10,
+        "y": 33
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "inspect": false,
+            "cellOptions": {
+              "type": "auto"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "BUY": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "SELL": {
+                        "color": "red",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "md",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Date",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "trade_log",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {
+              "date": 0,
+              "ticker": 1,
+              "action": 2,
+              "shares": 3,
+              "price": 4,
+              "value": 5
+            },
+            "renameByName": {
+              "date": "Date",
+              "ticker": "Ticker",
+              "action": "Action",
+              "shares": "Shares",
+              "price": "Price",
+              "value": "Value"
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "Shares",
+                "destinationType": "number"
+              },
+              {
+                "targetField": "Price",
+                "destinationType": "number"
+              },
+              {
+                "targetField": "Value",
+                "destinationType": "number"
+              }
+            ]
+          }
+        }
+      ],
+      "description": "Trade log from the trades exporter (job=trades)."
+    },
+    {
+      "type": "stat",
+      "title": "SPY Benchmark",
+      "id": 18,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 33
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "stock_price{ticker=\"SPY\"}",
+          "refId": "A",
+          "legendFormat": "SPY"
+        }
+      ],
+      "description": "SPY price, with % change over the selected time range for comparison with ROI."
+    },
+    {
+      "type": "stat",
+      "title": "Total Trades",
+      "id": 19,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_trade_count",
+          "refId": "A",
+          "legendFormat": "Trades"
+        }
+      ],
+      "description": "Number of trades executed so far."
+    },
+    {
+      "type": "row",
+      "title": "Strategy & Key Dates",
+      "id": 20,
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      }
+    },
+    {
+      "type": "text",
+      "title": "Strategy Playbook",
+      "id": 21,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Earnings avoidance:** exit holdings and skip buys within 3 trading days of earnings.\n\n**Trailing stop:** arms at +5% P&L, trails 8% below the peak\n"
+      }
+    }
+  ],
+  "id": null
+}

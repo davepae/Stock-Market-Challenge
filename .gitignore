@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+# runtime data
+trades.csv
+news/
+*.log
+peaks.json
+peaks.lock

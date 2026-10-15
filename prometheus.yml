@@ -1,0 +1,25 @@
+# Prometheus config for the Mock Stock Challenge (student edition).
+# Installed to /etc/prometheus/prometheus.yml by install.sh.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Portfolio exporter (app.py, Flask) - /metrics on port 8081
+  - job_name: 'portfolio'
+    static_configs:
+      - targets: ['localhost:8081']
+
+  # Per-ticker prices (app/exporters/stock_exporter.py) - used by dashboard price panels
+  - job_name: 'stock_prices'
+    static_configs:
+      - targets: ['localhost:8080']
+
+  # Trade log table (app/exporters/trades_exporter.py) - used by dashboard trade table
+  - job_name: 'trades'
+    static_configs:
+      - targets: ['localhost:8082']
