@@ -5,7 +5,8 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from prometheus_client import generate_latest, REGISTRY, Gauge
 
-TRADES_FILE = os.path.expanduser("~/.hermes/cache/stocks/trades.csv")
+DATA_DIR = os.environ.get("STOCKS_DATA_DIR", os.path.expanduser("~/.hermes/cache/stocks"))
+TRADES_FILE = os.path.join(DATA_DIR, "trades.csv")
 
 # Pre-defined metric — we'll set values dynamically
 TRADE_METRIC = Gauge(
@@ -57,6 +58,6 @@ class TradesHandler(BaseHTTPRequestHandler):
         pass  # Suppress logs
 
 if __name__ == "__main__":
-    server = HTTPServer(("0.0.0.0", 8082), TradesHandler)
+    server = HTTPServer(("127.0.0.1", 8082), TradesHandler)
     print("Trades exporter on :8082")
     server.serve_forever()

@@ -128,7 +128,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "ticker_pnl_pct",
+          "expr": "(holding_current_price{ticker=~\"$ticker\"} - holding_entry_price{ticker=~\"$ticker\"}) / holding_entry_price{ticker=~\"$ticker\"} * 100",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ticker}}",
@@ -140,7 +140,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "ticker_shares",
+          "expr": "holding_shares{ticker=~\"$ticker\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ticker}}",
@@ -152,7 +152,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "ticker_entry_price",
+          "expr": "holding_entry_price{ticker=~\"$ticker\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ticker}}",
@@ -164,7 +164,7 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "ticker_current_price",
+          "expr": "holding_current_price{ticker=~\"$ticker\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ticker}}",

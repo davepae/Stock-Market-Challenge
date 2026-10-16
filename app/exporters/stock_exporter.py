@@ -8,6 +8,7 @@ Usage:
   Defaults to SPY (S&P 500 ETF) if no tickers given.
 """
 
+import os
 import sys
 import time
 import logging
@@ -19,7 +20,7 @@ from prometheus_client import start_http_server, Gauge
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
 # Directory for cached data
-DATA_DIR = Path.home() / ".hermes/cache/stocks"
+DATA_DIR = Path(os.environ.get("STOCKS_DATA_DIR", Path.home() / ".hermes/cache/stocks")).expanduser()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default tickers (S&P 500 ETF as benchmark)

@@ -37,7 +37,7 @@ Data lives in `~/.hermes/cache/stocks/`:
 ## 2. Setup
 
 ```bash
-cd /home/ysagent/stocks_challenge
+cd ~/stocks_challenge
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -46,7 +46,7 @@ Optional environment overrides (useful for testing against a scratch ledger):
 
 | Variable | Default |
 |----------|---------|
-| `STOCKS_TRADES_CSV` | `/home/ysagent/.hermes/cache/stocks/trades.csv` |
+| `STOCKS_TRADES_CSV` | `~/.hermes/cache/stocks/trades.csv` |
 | `STOCKS_DATA_DIR` | `~/.hermes/cache/stocks` |
 | `STOCKS_PEAKS_JSON` | `peaks.json` beside the trade log |
 | `STOCKS_EXPORTER_PORT` | `8081` |

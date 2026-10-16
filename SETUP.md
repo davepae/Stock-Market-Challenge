@@ -66,6 +66,20 @@ cp student_distro/student_trades.csv ~/.hermes/cache/stocks/trades.csv   # heade
 (starting cash $5,000,000) is rebuilt from this file. Always add trades with
 `python log_trade.py TICKER BUY|SELL SHARES PRICE`, which validates them.
 
+### Environment variables (optional)
+| Variable | Purpose |
+|---|---|
+| `STOCKS_DATA_DIR` | Override the data directory (default `~/.hermes/cache/stocks`) |
+| `STOCKS_EXPORTER_PORT` | Portfolio exporter (`app.py`) port (default `8081`) |
+| `STOCKS_TRADES_CSV` | Override the trades file path |
+| `STOCKS_PEAKS_JSON` | Override the peaks file path |
+
+### Running the tests (optional)
+```bash
+pip install -r app/requirements-dev.txt     # adds pytest
+cd app && python -m pytest tests
+```
+
 ## 7. Prometheus and Grafana configuration (manual)
 ```bash
 sudo cp student_distro/prometheus.yml /etc/prometheus/prometheus.yml
