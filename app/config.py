@@ -8,7 +8,7 @@ which is handy for testing against a scratch trade log.
 
 import os
 
-# --- Trading rules ---------------------------------------------------------
+# --- Contest rules ---------------------------------------------------------
 # Long-only stocks/ETFs, no shorting/options/leverage/margin, cash never
 # negative (enforced by log_trade.validate_trade), fractional shares allowed,
 # dividends excluded (price-only P&L).
@@ -19,13 +19,21 @@ MIN_TRADE_VALUE: float = 250                 # skip buys smaller than this (USD)
 INITIAL_CASH: float = 5000000
 PORTFOLIO_EXPORTER_PORT: int = int(os.environ.get("STOCKS_EXPORTER_PORT", 8081))
 PORTFOLIO_EXPORTER_URL: str = f"http://localhost:{PORTFOLIO_EXPORTER_PORT}"
+DATA_DIR: str = os.environ.get(
+    "STOCKS_DATA_DIR", os.path.expanduser("~/.hermes/cache/stocks")
+)
+NEWS_CACHE_DIR: str = os.path.join(DATA_DIR, "news")
 TRADES_CSV: str = os.environ.get(
-    "STOCKS_TRADES_CSV", os.path.expanduser("~/.hermes/cache/stocks/trades.csv")
+    "STOCKS_TRADES_CSV", os.path.join(DATA_DIR, "trades.csv")
 )
 # Highest price observed per open position, for trailing stops.
 PEAKS_JSON: str = os.environ.get(
     "STOCKS_PEAKS_JSON", os.path.join(os.path.dirname(TRADES_CSV), "peaks.json")
 )
+
+# --- Scoring cache ---------------------------------------------------
+SCORING_JSON: str = os.path.join(os.path.dirname(TRADES_CSV), "scoring.json")
+PLANS_JSON: str = os.path.join(os.path.dirname(TRADES_CSV), "plans.json")
 
 # --- Universe --------------------------------------------------------------
 STOCK_UNIVERSE: list[str] = ["SPY", "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA"]
@@ -37,17 +45,19 @@ WATCHLIST_EXTRA: list[str] = [
 ]
 
 # --- Risk management (percent values) --------------------------------------
-# Per-ticker stop loss below entry, wider for more volatile names. No take
-# profit: winners run until the trailing stop is hit.
-STOP_LOSS_BY_TICKER: dict[str, float] = {
-    "AAPL": 8, "MSFT": 7, "GOOGL": 8, "AMZN": 8, "META": 9, "NVDA": 12, "TSLA": 15, "SPY": 6,
-}
-DEFAULT_STOP_LOSS_PCT: float = 10      # tickers missing from STOP_LOSS_BY_TICKER
+# Stop loss below entry is volatility-scaled per ticker:
+# clamp(3 * daily volatility% * sqrt(5), STOP_LOSS_MIN_PCT, STOP_LOSS_MAX_PCT).
+# No take profit: winners run until the trailing stop is hit.
+STOP_LOSS_MIN_PCT: float = 5
+STOP_LOSS_MAX_PCT: float = 15
+DEFAULT_STOP_LOSS_PCT: float = 10      # fallback when no volatility is known
 TRAILING_STOP_PCT: float = 8           # sell when price falls this far below the peak
 TRAILING_STOP_ACTIVATION: float = 5    # trailing stop arms once P&L reaches this
-MAX_POSITION_PCT: float = 60
-MIN_CASH_PCT: float = 0.5
-MAX_POSITIONS: int = 3
+MAX_POSITION_PCT: float = 18           # hard cap per position; larger ones are trimmed
+MIN_CASH_PCT: float = 5.0              # cash reserve never deployed by buys/top-ups
+MAX_POSITIONS: int = 10
+MAX_NEW_BUYS_PER_CYCLE: int = 3        # new positions opened per cycle, best score first
+REBALANCE_MIN_WEIGHT_FRACTION: float = 1 / 3  # sell positions below this share of target weight
 ROTATION_MIN_REL_STR_EDGE: float = 3   # candidate must beat the weakest holding's
                                        # relative strength by this to replace it
 
@@ -63,8 +73,9 @@ MA_BREAK_CONFIRM_DAYS: int = 2
 MA_BREAK_HARD_PCT: float = 2
 
 # --- Technical analysis ----------------------------------------------------
-HISTORY_DAYS: int = 30                 # trading sessions of history to analyse
+HISTORY_DAYS: int = 90                 # trading sessions of history to analyse
 MA_PERIOD: int = 20
+LONG_MA_PERIOD: int = 50               # trend filter: no entries below it; SPY below it = no new buys
 RSI_PERIOD: int = 14
 BENCHMARK_TICKER: str = "SPY"
 REL_STR_PERIOD: int = 20               # sessions for relative strength vs the benchmark
@@ -93,7 +104,7 @@ NEWS_PANIC_SELL: float = -3            # hourly check: sell on news <= this AND 
 # --- Initial portfolio -----------------------------------------------------
 INITIAL_MIN_PICKS: int = 2
 INITIAL_MAX_PICKS: int = MAX_POSITIONS
-INITIAL_TOP_ALLOCATION_PCT: float = 60  # highest-conviction pick; rest split evenly
+INITIAL_TOP_ALLOCATION_PCT: float = 10  # highest-conviction pick (at least an equal share); rest split evenly
 INITIAL_FILL_MIN_SCORE: float = 5.0     # HOLD-rated picks may fill up to MIN_PICKS
 
 # --- News ------------------------------------------------------------------
@@ -101,6 +112,12 @@ NEWS_QUERY_TEMPLATE: str = "{ticker} stock news today"
 EARNINGS_QUERY_TEMPLATE: str = "{ticker} earnings"
 EARNINGS_SIGNAL_DAYS: int = 3          # days to watch for post-earnings drift
 EARNINGS_CATALYST_BOOST: float = 1.5   # composite boost after an earnings beat
+EARNINGS_BOOST_MAX_NEWS: float = 2     # boost only applies when news score is below this
+                                       # (higher news already reflects the beat)
+NEWS_SCORE_CAP: float = 1              # news contributes at most +/- this to the composite
+                                       # until validated
+REENTRY_COOLDOWN_DAYS: int = 3          # business days after a discretionary sell before re-entry
+MIN_HOLD_SESSIONS: int = 2              # sessions to hold before discretionary (non-stop) sells
 EARNINGS_EXIT_DAYS: int = 3             # trading days before earnings: exit holdings, skip buys
 NEWS_LOOKBACK_HOURS: int = 72          # ignore headlines older than this
 NEWS_MAX_HEADLINES: int = 20           # per ticker, newest first
@@ -109,7 +126,8 @@ HEADLINE_SCAN_QUERIES: list[str] = ["stocks to watch today", "analyst upgrade", 
 HEADLINE_SCAN_MAX_TICKERS: int = 5     # new tickers added to the universe per cycle
 NEWS_DAMPING: float = 3                # dampens scores built from few headlines
 # A headline only counts if it mentions the ticker or one of these names
-# (case-insensitive, whole words). Tickers not listed match on symbol only.
+# (case-insensitive, whole words). Symbols of 3 characters or fewer must match
+# case-exactly ("V", not "v"). Tickers not listed match on symbol only.
 NEWS_ALIASES: dict[str, list[str]] = {
     "SPY": ["S&P 500", "S&P", "stock market", "Wall Street", "Dow Jones", "Nasdaq",
             "stock futures", "Fed", "inflation"],
@@ -120,6 +138,11 @@ NEWS_ALIASES: dict[str, list[str]] = {
     "META": ["Meta", "Facebook", "Instagram", "WhatsApp", "Zuckerberg"],
     "NVDA": ["Nvidia"],
     "TSLA": ["Tesla", "Cybertruck", "Cybercab", "robotaxi"],
+    "V": ["Visa"],
+    "MA": ["Mastercard"],
+    "C": ["Citigroup", "Citi"],
+    "GS": ["Goldman Sachs", "Goldman"],
+    "SQ": ["Square", "Block Inc"],
 }
 
 # --- Caching ---------------------------------------------------------------

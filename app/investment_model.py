@@ -4,20 +4,20 @@
 Combines four inputs into a composite 1-10 score and a recommendation
 (STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL) for each ticker:
 
-  - Technical score (1-10): momentum from tech_analysis.py, adjusted for
-    RSI extremes, price position vs. the 20MA and the classic entry setup.
+  - Technical score (1-10): momentum from tech_analysis.py (already includes
+    price vs. 20MA, RSI and ROC), penalised only for RSI extremes.
   - News sentiment (-5..+5): recent headlines found by searching the web
     ("{ticker} stock news today" and "{ticker} earnings" on Google News, plus
     the Yahoo Finance headline feed), scored with a keyword lexicon for
     catalysts such as earnings beats/misses, launches, partnerships, lawsuits
     and regulation.
-  - Earnings catalyst: +EARNINGS_CATALYST_BOOST if the company reported a
+  - Earnings catalyst: +EARNINGS_CATALYST_BOOST (only when news < EARNINGS_BOOST_MAX_NEWS) if the company reported a
     positive quarter (beat / raised guidance) in the last EARNINGS_SIGNAL_DAYS
     days, to ride post-earnings drift.
   - Position context: for held tickers, P&L vs. entry, proximity to the
     ticker's stop loss, and how long the position has been open.
 
-    composite = TECHNICAL_WEIGHT * technical + NEWS_WEIGHT * (news + 5)
+    composite = TECHNICAL_WEIGHT * technical + NEWS_WEIGHT * (clamp(news, +/-NEWS_SCORE_CAP) + 5)
                 + earnings boost + position adjustment, clamped to 1-10
 
 Usage:
@@ -46,8 +46,9 @@ from urllib.parse import quote_plus
 import requests
 
 import config
+import risk
 from log_trade import EPSILON, TradeError, read_trades
-from tech_analysis import Analysis, analyze
+from tech_analysis import Analysis, analyze, market_regime_ok
 
 RECOMMENDATIONS: tuple[str, ...] = ("STRONG_BUY", "BUY", "HOLD", "SELL", "STRONG_SELL")
 BUY_RECOMMENDATIONS: frozenset[str] = frozenset({"STRONG_BUY", "BUY"})
@@ -57,7 +58,7 @@ GOOGLE_NEWS_URL = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&c
 YAHOO_NEWS_URL = "https://feeds.finance.yahoo.com/rss/2.0/headline?s={ticker}&region=US&lang=en-US"
 HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux aarch64) mock-stock-challenge/1.0"}
 NEWS_CACHE_SECONDS = 900  # 15 minutes
-NEWS_CACHE_DIR = Path.home() / ".hermes" / "cache" / "stocks" / "news"
+NEWS_CACHE_DIR = Path(config.NEWS_CACHE_DIR)
 
 
 # --- Data types -----------------------------------------------------------------
@@ -283,8 +284,15 @@ def _parse_rss(xml_text: str, default_source: str) -> list[tuple[str, str, datet
 
 def relevance_pattern(ticker: str) -> re.Pattern[str]:
     """Regex matching headlines that mention ticker or its NEWS_ALIASES."""
-    names = [ticker, *config.NEWS_ALIASES.get(ticker, [])]
-    return re.compile(r"(?<!\w)(?:" + "|".join(map(re.escape, names)) + r")(?!\w)", re.I)
+    aliases = "|".join(map(re.escape, config.NEWS_ALIASES.get(ticker, [])))
+    if len(ticker) <= 3:
+        # Short symbols ("V", "C", "MA") collide with ordinary words: match the
+        # symbol case-exactly and not glued to punctuation like "U.S." or "C-suite".
+        symbol = rf"(?<![\w.-]){re.escape(ticker.upper())}(?![\w.-])"
+        alias = rf"(?i:(?<!\w)(?:{aliases})(?!\w))" if aliases else ""
+        return re.compile("|".join(filter(None, [symbol, alias])))
+    names = "|".join(filter(None, [re.escape(ticker), aliases]))
+    return re.compile(rf"(?<!\w)(?:{names})(?!\w)", re.I)
 
 
 def search_news(ticker: str, session: requests.Session | None = None) -> list[NewsItem]:
@@ -515,16 +523,14 @@ def passes_entry(a: Analysis) -> bool:
 
 
 def technical_score(a: Analysis) -> tuple[float, list[str]]:
-    """Score the technical setup 1-10 from momentum, RSI and MA position."""
+    """Score the technical setup 1-10: momentum plus an RSI-extreme penalty.
+
+    momentum_score already folds in price vs. 20MA, RSI and ROC, so only the
+    RSI extremes (not captured linearly there) adjust it.
+    """
     score = float(a.momentum)
     reasons = [f"momentum {a.momentum}"]
-    if passes_entry(a):
-        score += 1
-        reasons.append("entry setup")
-    if a.price >= a.ma20:
-        score += 0.5
-    else:
-        score -= 1
+    if a.price < a.ma20:
         reasons.append(f"below 20MA ({a.price_vs_ma_pct:+.1f}%)")
     if a.rsi > config.RSI_OVERBOUGHT:
         score -= 1.5
@@ -535,7 +541,8 @@ def technical_score(a: Analysis) -> tuple[float, list[str]]:
     return max(1.0, min(10.0, score)), reasons
 
 
-def position_adjustment(ticker: str, pos: PositionContext | None) -> tuple[float, list[str]]:
+def position_adjustment(ticker: str, pos: PositionContext | None,
+                        volatility_pct: float | None = None) -> tuple[float, list[str]]:
     """Adjust the composite for an existing position (-2..+1).
 
     There is no take-profit penalty: winners are managed by the trailing stop.
@@ -544,7 +551,7 @@ def position_adjustment(ticker: str, pos: PositionContext | None) -> tuple[float
         return 0.0, []
     adj, reasons = 0.0, [f"held {pos.days_held if pos.days_held is not None else '?'}d, "
                          f"P&L {pos.pnl_pct:+.1f}%"]
-    stop = config.STOP_LOSS_BY_TICKER.get(ticker, config.DEFAULT_STOP_LOSS_PCT)
+    stop = risk.stop_loss_pct(risk.stop_pct_from_volatility(volatility_pct) if volatility_pct else None)
     if pos.pnl_pct <= -0.75 * stop:
         adj -= 1.0
         reasons.append("near stop loss")
@@ -557,18 +564,27 @@ def position_adjustment(ticker: str, pos: PositionContext | None) -> tuple[float
     return max(-2.0, min(1.0, adj)), reasons
 
 
-def qualifies_for_entry(s: TickerScore) -> bool:
+def qualifies_for_entry(s: TickerScore, last_sell: dict | None = None,
+                        market_ok: bool = True) -> bool:
     """True if a non-held ticker meets the model-augmented entry rules.
 
     Requires a BUY/STRONG_BUY that is not overbought (RSI <= RSI_OVERBOUGHT)
     and either passes the classic setup (>= ENTRY_MIN_PCT_ABOVE_MA above the
     20MA, momentum, RSI <= ENTRY_RSI_MAX) or is a STRONG_BUY above the 20MA.
     A STRONG_BUY with an earnings beat may enter even below the 20MA.
+    Never enters below the 50MA, nor when ``market_ok`` is False (SPY below its
+    own 50MA; see tech_analysis.market_regime_ok).
+    ``last_sell`` is the ticker's peaks.json record: a discretionary (non-stop)
+    sell within REENTRY_COOLDOWN_DAYS business days blocks re-entry.
     """
     a = s.analysis
     if a is None or s.held or s.recommendation not in BUY_RECOMMENDATIONS:
         return False
+    if risk.in_reentry_cooldown(last_sell):
+        return False
     if a.rsi > config.RSI_OVERBOUGHT:
+        return False
+    if a.below_ma50 or not market_ok:
         return False
     if a.price <= a.ma20:
         return s.recommendation == "STRONG_BUY" and s.earnings_boost > 0
@@ -607,12 +623,18 @@ def combine(ticker: str, analysis: Analysis | None, news: NewsSentiment,
         c = news.counts
         reasons.append(f"news {news.score:+.1f} ({c['positive']}+/{c['negative']}-/{c['neutral']}=)")
         boost, earnings_reasons = earnings_catalyst(ticker, news.headlines)
+        if boost and news.score >= config.EARNINGS_BOOST_MAX_NEWS:
+            boost = 0.0  # the beat is already counted in the news score
+            earnings_reasons = [f"earnings beat already in news score {news.score:+.1f}"]
         reasons += earnings_reasons
-    adj, pos_reasons = position_adjustment(ticker, position)
+    adj, pos_reasons = position_adjustment(
+        ticker, position, analysis.volatility_pct if analysis else None)
     reasons += pos_reasons
 
+    cap = config.NEWS_SCORE_CAP
+    news_term = max(-cap, min(cap, news.score))
     composite = (config.TECHNICAL_WEIGHT * tech
-                 + config.NEWS_WEIGHT * (news.score + 5)
+                 + config.NEWS_WEIGHT * (news_term + 5)
                  + boost
                  + adj)
     composite = round(max(1.0, min(10.0, composite)), 1)

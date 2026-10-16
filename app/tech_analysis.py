@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Technical analysis for the Mock Stock Challenge universe.
 
-For each ticker, computes from the last 30 trading sessions of daily data:
+For each ticker, computes from the last HISTORY_DAYS (90) trading sessions of daily data:
   - current price
-  - 20-period simple moving average
+  - 20- and 50-period simple moving averages (50MA = trend/regime filter)
   - 14-period RSI (Wilder smoothing)
   - price vs. MA (percent)
   - momentum score from 1 (weak) to 10 (strong)
@@ -45,6 +45,8 @@ class Analysis:
     rel_str: float | None = None    # REL_STR_PERIOD return minus benchmark's, in points
     volatility_pct: float = 0.0     # stdev of daily returns over MA_PERIOD sessions
     days_below_ma: int = 0          # consecutive closes (ending today) below their 20MA
+    ma50: float | None = None       # LONG_MA_PERIOD simple MA; None with too little history
+    below_ma50: bool = False        # price below the 50MA (False when unknown)
 
 
 def compute_rsi(closes: list[float], period: int = config.RSI_PERIOD) -> float:
@@ -140,6 +142,8 @@ def analyze_closes(ticker: str, closes: list[float],
                                  if benchmark is not None else None)
     except ValueError:
         rel_str = None
+    long_period = config.LONG_MA_PERIOD
+    ma50 = sum(closes[-long_period:]) / long_period if len(closes) >= long_period else None
     return Analysis(
         ticker=ticker,
         price=round(price, 2),
@@ -151,7 +155,17 @@ def analyze_closes(ticker: str, closes: list[float],
         rel_str=rel_str,
         volatility_pct=round(daily_volatility(closes), 2),
         days_below_ma=consecutive_closes_below_ma(closes),
+        ma50=round(ma50, 2) if ma50 is not None else None,
+        below_ma50=ma50 is not None and price < ma50,
     )
+
+
+def market_regime_ok(benchmark: Analysis | None) -> bool:
+    """False when the benchmark (SPY) is below its 50-day MA: no new buys.
+
+    Fails open (True) if the benchmark or its 50MA is unavailable.
+    """
+    return benchmark is None or not benchmark.below_ma50
 
 
 def fetch_closes(tickers: list[str], days: int = config.HISTORY_DAYS) -> dict[str, list[float]]:
@@ -242,13 +256,15 @@ def fetch_earnings_dates(tickers: list[str]) -> dict[str, date]:
 def format_table(results: list[Analysis]) -> str:
     """Render results as a fixed-width text table."""
     header = (f"{'TICKER':<7}{'PRICE':>10}{'MA20':>10}{'RSI':>7}{'vs MA%':>9}{'5D%':>8}{'MOM':>5}"
-              f"{'REL_STR':>9}{'VOL%':>6}")
+              f"{'REL_STR':>9}{'VOL%':>6}{'MA50':>9}")
     lines = [header, "-" * len(header)]
     for r in results:
         rel = f"{r.rel_str:>+9.2f}" if r.rel_str is not None else f"{'n/a':>9}"
+        ma50 = f"{r.ma50:>9.2f}" if r.ma50 is not None else f"{'n/a':>9}"
         lines.append(f"{r.ticker:<7}{r.price:>10.2f}{r.ma20:>10.2f}{r.rsi:>7.1f}"
                      f"{r.price_vs_ma_pct:>+9.2f}{r.roc5_pct:>+8.2f}{r.momentum:>5}"
-                     f"{rel}{r.volatility_pct:>6.2f}")
+                     f"{rel}{r.volatility_pct:>6.2f}"
+                     f"{ma50}")
     return "\n".join(lines)
 
 

@@ -28,7 +28,8 @@ are not implemented.
 
 Data lives in `~/.hermes/cache/stocks/`:
 `trades.csv` (ledger: `date, ticker, action, shares, price`),
-`peaks.json` (peak prices for trailing stops),
+`peaks.json` (peak prices, per-position stop %, last-sell records for the re-entry cooldown),
+`scoring.json` / `plans.json` (last cycle's scores and planned trades, served at `/analysis` and `/plans`),
 `news/{TICKER}.json` (news cache, 15-minute TTL; safe to delete).
 
 ---
@@ -46,6 +47,7 @@ Optional environment overrides (useful for testing against a scratch ledger):
 | Variable | Default |
 |----------|---------|
 | `STOCKS_TRADES_CSV` | `/home/ysagent/.hermes/cache/stocks/trades.csv` |
+| `STOCKS_DATA_DIR` | `~/.hermes/cache/stocks` |
 | `STOCKS_PEAKS_JSON` | `peaks.json` beside the trade log |
 | `STOCKS_EXPORTER_PORT` | `8081` |
 
@@ -56,7 +58,7 @@ Optional environment overrides (useful for testing against a scratch ledger):
 ### Start the portfolio exporter
 
 ```bash
-python app.py            # serves on http://localhost:8081
+python app.py            # serves on http://127.0.0.1:8081 (local only)
 ```
 
 | Endpoint | Returns |
@@ -108,29 +110,35 @@ Use `--trades-file PATH` to write to a different ledger.
 
 ## 4. How it decides
 
-**Entry** — price ≥ 1% above its 20-day MA, momentum ≥ 5/10, RSI between 40 and 75.
+**Entry** — price ≥ 1% above its 20-day MA and above its 50-day MA, momentum ≥ 5/10, RSI between 40 and 75. No new buys at all while SPY is below its own 50-day MA. A discretionary (non-stop) sell blocks re-entry for 3 business days.
 
-**Score** — 70% technicals + 30% news (+1.5 after a positive earnings report).
+**Score** — 70% technicals + 30% news. News contributes at most ±1 to the composite (`NEWS_SCORE_CAP`). A positive earnings report adds +1.5, but only when the news score is below 2 (otherwise the beat is already counted).
 Ratings: STRONG_BUY ≥ 7.0, BUY ≥ 5.8, SELL ≤ 4.0, STRONG_SELL ≤ 2.8.
 
-**Portfolio** — at most 3 positions, ranked by 20-day return vs SPY (plus a
-small volatility bonus), minimum $250 per buy. The first allocation puts 60%
-in the top pick and splits the rest evenly. When full, a candidate can replace
-the weakest holding if its relative strength is at least 3 points higher.
+**Portfolio** — at most 10 positions, ranked by 20-day return vs SPY (plus a
+small volatility bonus), minimum $250 per buy, at most 3 new positions per
+cycle (best score first). Each position is capped at 18% of the portfolio
+(larger ones are trimmed) and 5% cash is always kept in reserve. The first
+allocation gives the top pick 10% and splits the rest evenly. Idle cash tops
+up kept holdings toward an equal weight; holdings below one third of target
+weight are sold. When full, a candidate can replace the weakest holding if its
+relative strength is at least 3 points higher; positions held fewer than 2
+sessions are never rotated out or sold discretionarily.
 
 **Exits** (first match wins)
 
 | Trigger | Rule |
 |---------|------|
-| Stop loss | 6–15% below entry depending on ticker (SPY 6, MSFT 7, AAPL/GOOGL/AMZN 8, META 9, NVDA 12, TSLA 15; others 10) |
-| Trailing stop | Arms once the peak is 5% above entry; sells at 8% below the peak |
+| Stop loss | Volatility-scaled: 3 × weekly volatility (daily stdev × √5), clamped to 5–15% below entry; 10% if volatility is unknown. Stored per position in `peaks.json` |
+| Trailing stop | Arms once the peak is 5% above entry; sells at 8% below the peak, never below breakeven |
 | Earnings avoidance | Within 3 trading days of earnings, holdings are sold and no buys are made |
 | Technical | SELL/STRONG_SELL rating, momentum ≤ 4, or confirmed 20MA break (2 closes below, or 2% below) |
 | News override | News score ≥ 3 (or a STRONG_BUY with an earnings catalyst) holds through the momentum/20MA exits |
 | News panic (risk-only) | News score ≤ -3 **and** price below previous close sells the whole position |
 
 There is no take-profit cap — winners run until the trailing stop hits. The
-trailing stop is `peak × (1 − 8%)`; there is no separate breakeven floor.
+trailing stop is `max(entry, peak × (1 − 8%))`, so once armed it cannot
+lock in a loss.
 
 ### News handling
 
@@ -161,8 +169,7 @@ The `student_distro/` bundle configures Prometheus to scrape `localhost:8081`
 
 Metrics emitted by `app.py`: `portfolio_value`, `portfolio_cash`,
 `portfolio_roi`, `portfolio_holdings_value`, `portfolio_trade_count`, and per
-holding `holding_<ticker>_{shares,value,entry_price,peak_price,trailing_stop,rel_strength}`
-(`rel_strength` is omitted when it cannot be computed).
+holding labeled `holding_*{ticker=...}` series (shares, value, entry price, peak price, trailing stop, relative strength; relative strength is omitted when it cannot be computed). Prices refresh in a background thread, and the exporter binds to 127.0.0.1 only. Each cycle also writes `trading_cycle_last_run_timestamp{status=...}` to a Prometheus textfile, and runs are serialized by a lock file.
 
 ---
 

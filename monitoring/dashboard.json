@@ -1,66 +1,4 @@
 {
-  "uid": "mock-stock-challenge",
-  "title": "Mock Stock Challenge",
-  "tags": [
-    "mock-stock",
-    "challenge"
-  ],
-  "timezone": "browser",
-  "editable": true,
-  "graphTooltip": 1,
-  "schemaVersion": 39,
-  "version": 4,
-  "refresh": "30s",
-  "time": {
-    "from": "now-7d",
-    "to": "now"
-  },
-  "timepicker": {
-    "refresh_intervals": [
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m"
-    ]
-  },
-  "liveNow": false,
-  "templating": {
-    "list": [
-      {
-        "name": "ticker",
-        "label": "Ticker",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "ag164tx65ph4wd"
-        },
-        "definition": "query_result({__name__=~\"holding_.+_shares\"})",
-        "query": {
-          "qryType": 3,
-          "query": "query_result({__name__=~\"holding_.+_shares\"})",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "regex": "/holding_([a-z0-9]+)_shares/",
-        "refresh": 2,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".+",
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "options": [],
-        "hide": 0
-      }
-    ]
-  },
   "annotations": {
     "list": [
       {
@@ -85,47 +23,306 @@
         "iconColor": "orange",
         "name": "Earnings",
         "target": {
-          "type": "tags",
+          "limit": 100,
+          "matchAny": true,
           "tags": [
             "mock-stock-earnings"
           ],
-          "limit": 100,
-          "matchAny": true
+          "type": "tags"
         }
       }
     ]
   },
+  "editable": true,
+  "graphTooltip": 1,
+  "liveNow": false,
   "panels": [
     {
-      "type": "row",
-      "title": "Portfolio Overview",
-      "id": 1,
       "collapsed": false,
-      "panels": [],
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
-      }
+      },
+      "id": 1000,
+      "title": "What's Happening",
+      "type": "row"
     },
     {
-      "type": "stat",
-      "title": "Portfolio Total",
-      "id": 2,
+      "content": "# Today's Update\n*Updated: 2026-10-16 14:30:00*\n\n**4 holdings analyzed**\n\n### \ud83d\udfe2 NVDA \u2014 STRONG_BUY\n- **Score:** 8.2/10  (tech: 8.0, news: 2.1)\n- **Position:** 500 shares @ $130.00  |  **P&L:** +12.5%\n- **Reasons:** earnings beat; momentum 9; RS +5.2\n\n### \ud83d\udfe1 AAPL \u2014 HOLD\n- **Score:** 4.5/10  (tech: 4.0, news: 0.5)\n- **Position:** 300 shares @ $175.00  |  **P&L:** -2.1%\n- **Reasons:** flat momentum\n\n### \ud83d\udfe0 MSFT \u2014 SELL\n- **Score:** 3.2/10  (tech: 3.0, news: -1.0)\n- **Position:** 200 shares @ $420.00  |  **P&L:** -5.3%\n- **Reasons:** below 50MA; news negative\n\n### \ud83d\udd35 GOOGL \u2014 BUY\n- **Score:** 6.8/10  (tech: 6.5, news: 1.5)\n- **Position:** 400 shares @ $160.00  |  **P&L:** +8.1%\n- **Reasons:** above 20MA; AI growth\n",
       "datasource": {
+        "id": 1,
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
       "gridPos": {
-        "h": 5,
-        "w": 6,
+        "h": 9,
+        "w": 12,
         "x": 0,
         "y": 1
       },
+      "id": 1001,
+      "options": {
+        "cardLayout": {
+          "cardBackground": true,
+          "cardBorderColor": "#e0e0e0",
+          "cardBorderRadius": 8,
+          "cardDirection": "row",
+          "cardGap": 8,
+          "cardHeight": "auto",
+          "cardHorizontalPadding": 16,
+          "cardShadow": true,
+          "cardShowBorder": true,
+          "cardShowShadow": true,
+          "cardVerticalPadding": 12,
+          "showIcon": false
+        },
+        "codeFolding": "auto",
+        "content": "# Today's Update\n{{#if data.length}}\n<div class=\"tu-wrap\">\n{{#each data}}\n<div class=\"tu-card {{#if is_sb}}tu-sb{{else}}{{#if is_b}}tu-b{{else}}{{#if is_h}}tu-h{{else}}{{#if is_s}}tu-s{{else}}{{#if is_ss}}tu-ss{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}\">\n<div class=\"tu-head\"><span class=\"tu-ticker\">{{ticker}}</span><span class=\"tu-score\">{{score}}<small>/10</small></span></div>\n<div class=\"tu-sub\">Tech: {{tech}} | News: {{news}}</div>\n<div class=\"tu-pos\">{{shares}} shares @ ${{entry}} (now ${{price}}) | P&amp;L: {{pnl}}%</div>\n{{#if reason}}<div class=\"tu-reason\">{{reason}}</div>{{/if}}\n</div>\n{{/each}}\n</div>\n{{else}}\n<div class=\"tu-empty\">Awaiting first trading cycle...</div>\n{{/if}}\n",
+        "css": "\n.tu-wrap { display: flex; flex-wrap: wrap; gap: 8px; }\n.tu-card { flex: 1 1 220px; padding: 12px 16px; border-radius: 8px;\n  border: 1px solid #e0e0e0; border-left: 6px solid #9e9e9e;\n  background: rgba(128,128,128,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }\n.tu-head { display: flex; align-items: center; gap: 8px; }\n.tu-ticker { font-size: 1.3em; font-weight: 700; }\n.tu-badge { font-size: 0.7em; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #fff; background: #9e9e9e; }\n.tu-score { margin-left: auto; font-size: 1.5em; font-weight: 700; }\n.tu-score small { font-size: 0.55em; opacity: 0.7; }\n.tu-sub, .tu-pos { margin-top: 4px; opacity: 0.85; }\n.tu-reason { margin-top: 6px; font-style: italic; opacity: 0.8; }\n.tu-sb { border-left-color: #1b9e4b; } .tu-sb .tu-badge { background: #1b9e4b; }\n.tu-b  { border-left-color: #7cb342; } .tu-b  .tu-badge { background: #7cb342; }\n.tu-h  { border-left-color: #f2b705; } .tu-h  .tu-badge { background: #f2b705; color: #222; }\n.tu-s  { border-left-color: #f57c00; } .tu-s  .tu-badge { background: #f57c00; }\n.tu-ss { border-left-color: #d32f2f; } .tu-ss .tu-badge { background: #d32f2f; }\n.tu-empty { padding: 16px; opacity: 0.7; }\n",
+        "defaultContent": "<div class=\"tu-empty\">Awaiting first trading cycle...</div>",
+        "fontSize": "0.9em",
+        "renderMode": "allRows",
+        "styles": "\n.tu-wrap { display: flex; flex-wrap: wrap; gap: 8px; }\n.tu-card { flex: 1 1 220px; padding: 12px 16px; border-radius: 8px;\n  border: 1px solid #e0e0e0; border-left: 6px solid #9e9e9e;\n  background: rgba(128,128,128,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }\n.tu-head { display: flex; align-items: center; gap: 8px; }\n.tu-ticker { font-size: 1.3em; font-weight: 700; }\n.tu-badge { font-size: 0.7em; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #fff; background: #9e9e9e; }\n.tu-score { margin-left: auto; font-size: 1.5em; font-weight: 700; }\n.tu-score small { font-size: 0.55em; opacity: 0.7; }\n.tu-sub, .tu-pos { margin-top: 4px; opacity: 0.85; }\n.tu-reason { margin-top: 6px; font-style: italic; opacity: 0.8; }\n.tu-sb { border-left-color: #1b9e4b; } .tu-sb .tu-badge { background: #1b9e4b; }\n.tu-b  { border-left-color: #7cb342; } .tu-b  .tu-badge { background: #7cb342; }\n.tu-h  { border-left-color: #f2b705; } .tu-h  .tu-badge { background: #f2b705; color: #222; }\n.tu-s  { border-left-color: #f57c00; } .tu-s  .tu-badge { background: #f57c00; }\n.tu-ss { border-left-color: #d32f2f; } .tu-ss .tu-badge { background: #d32f2f; }\n.tu-empty { padding: 16px; opacity: 0.7; }\n"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_score",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_technical_score",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_news_score",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_pnl_pct",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_shares",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_entry_price",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_current_price",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_reason",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_score >= bool 7.0",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(ticker_score >= bool 5.8) - (ticker_score >= bool 7.0)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "J"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "ticker_score <= bool 2.8",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "K"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(ticker_score <= bool 4.0) - (ticker_score <= bool 2.8)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "L"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(ticker_score > bool 4.0) * (ticker_score < bool 5.8)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "M"
+        }
+      ],
+      "title": "Today's Update",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "ticker",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "renameByName": {
+              "Value #A": "score",
+              "Value #B": "tech",
+              "Value #C": "news",
+              "Value #D": "pnl",
+              "Value #E": "shares",
+              "Value #F": "entry",
+              "Value #G": "price",
+              "Value #H": "reason",
+              "Value #I": "is_sb",
+              "Value #J": "is_b",
+              "Value #K": "is_ss",
+              "Value #L": "is_s",
+              "Value #M": "is_h",
+              "reason": "reason"
+            }
+          }
+        }
+      ],
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "content": "# Upcoming Planning\n\n*No trade plans available yet.*",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 1002,
+      "mode": "markdown",
+      "options": {
+        "content": "# Upcoming Planning\n\n*No trade plans available yet.*",
+        "mode": "markdown"
+      },
+      "title": "Upcoming Planning",
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Portfolio Overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "description": "Total portfolio value (neutral color; see ROI for gain/loss).",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
           "color": {
             "mode": "thresholds"
           },
@@ -133,23 +330,27 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 5000000
-              },
-              {
-                "color": "green",
-                "value": 5500000
               }
             ]
-          }
+          },
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -157,13 +358,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -172,32 +369,25 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_value",
-          "refId": "A",
-          "legendFormat": "Total"
+          "legendFormat": "Total",
+          "refId": "A"
         }
       ],
-      "description": "Total portfolio value. Green > $5.5M, yellow $5\u20135.5M, red < $5M."
+      "title": "Portfolio Total",
+      "type": "stat"
     },
     {
-      "type": "stat",
-      "title": "ROI",
-      "id": 3,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 6,
-        "y": 1
-      },
+      "description": "Return vs. initial cash, as a percent and in dollars. Green > 0, red < 0.",
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -206,16 +396,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 0
-              },
-              {
                 "color": "green",
-                "value": 5
+                "value": 0
               }
             ]
           },
-          "decimals": 2
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -242,12 +428,8 @@
                       "value": null
                     },
                     {
-                      "color": "yellow",
-                      "value": 0
-                    },
-                    {
                       "color": "green",
-                      "value": 250000.0
+                      "value": 0
                     }
                   ]
                 }
@@ -256,7 +438,18 @@
           }
         ]
       },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 3,
       "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -264,13 +457,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value_and_name",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -279,41 +468,34 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_roi",
-          "refId": "A",
-          "legendFormat": "ROI %"
+          "legendFormat": "ROI %",
+          "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "portfolio_value - 5000000",
-          "refId": "B",
-          "legendFormat": "P&L $"
+          "expr": "portfolio_value - $initial_cash",
+          "legendFormat": "P&L $",
+          "refId": "B"
         }
       ],
-      "description": "Return vs. $5M starting cash, as a percent and in dollars. Green > 5%, yellow 0\u20135%, red < 0%."
+      "title": "ROI",
+      "type": "stat"
     },
     {
-      "type": "stat",
-      "title": "Cash",
-      "id": 4,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 12,
-        "y": 1
-      },
+      "description": "Uninvested cash.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -323,11 +505,22 @@
               }
             ]
           },
-          "decimals": 0
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 11
+      },
+      "id": 4,
       "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -335,13 +528,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -350,32 +539,25 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_cash",
-          "refId": "A",
-          "legendFormat": "Cash"
+          "legendFormat": "Cash",
+          "refId": "A"
         }
       ],
-      "description": "Uninvested cash."
+      "title": "Cash",
+      "type": "stat"
     },
     {
-      "type": "stat",
-      "title": "Holdings Value",
-      "id": 5,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 18,
-        "y": 1
-      },
+      "description": "Market value of all open positions.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -385,11 +567,22 @@
               }
             ]
           },
-          "decimals": 0
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 11
+      },
+      "id": 5,
       "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -397,13 +590,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -412,47 +601,40 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_holdings_value",
-          "refId": "A",
-          "legendFormat": "Holdings"
+          "legendFormat": "Holdings",
+          "refId": "A"
         }
       ],
-      "description": "Market value of all open positions."
+      "title": "Holdings Value",
+      "type": "stat"
     },
     {
-      "type": "row",
-      "title": "Holdings",
-      "id": 8,
       "collapsed": false,
-      "panels": [],
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
-      }
+        "y": 16
+      },
+      "id": 8,
+      "panels": [],
+      "title": "Holdings",
+      "type": "row"
     },
     {
-      "type": "table",
-      "title": "Holdings",
-      "id": 9,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
+      "description": "Open positions, sorted by relative strength vs. SPY (20-day return difference). Current price = value \u00f7 shares.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
-            "inspect": false,
             "cellOptions": {
               "type": "auto"
-            }
+            },
+            "inspect": false
           },
           "thresholds": {
             "mode": "absolute",
@@ -612,8 +794,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
+                  "fixedColor": "text",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -688,14 +870,14 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
-                        "text": "Not armed",
                         "color": "text",
-                        "index": 0
+                        "index": 0,
+                        "text": "Not armed"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -703,20 +885,27 @@
           }
         ]
       },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 9,
       "options": {
-        "showHeader": true,
         "cellHeight": "md",
         "footer": {
-          "show": false,
+          "fields": "",
           "reducer": [
             "sum"
           ],
-          "fields": ""
+          "show": false
         },
+        "showHeader": true,
         "sortBy": [
           {
-            "displayName": "Rel Strength",
-            "desc": true
+            "desc": true,
+            "displayName": "Rel Strength"
           }
         ]
       },
@@ -726,90 +915,91 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))",
-          "refId": "A",
+          "expr": "sum by (ticker) (holding_shares{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\"))",
-          "refId": "B",
+          "expr": "sum by (ticker) (holding_entry_price{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "B"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\")))",
-          "refId": "C",
+          "expr": "(sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"}))",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "C"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\"))",
-          "refId": "D",
+          "expr": "sum by (ticker) (holding_value{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "D"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "(((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) - sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\"))) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_entry_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_entry_price\")) * 100)",
-          "refId": "E",
+          "expr": "(sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"} * on(ticker) holding_entry_price{ticker=~\"$ticker\"}) - 1) * 100",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "E"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_peak_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_peak_price\"))",
-          "refId": "F",
+          "expr": "sum by (ticker) (holding_peak_price{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "F"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))",
-          "refId": "G",
+          "expr": "sum by (ticker) (holding_trailing_stop{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "G"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_rel_strength\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_rel_strength\"))",
-          "refId": "H",
+          "expr": "sum by (ticker) (holding_rel_strength{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "H"
         }
       ],
+      "title": "Holdings",
       "transformations": [
         {
           "id": "merge",
@@ -822,7 +1012,6 @@
               "Time": true
             },
             "indexByName": {
-              "ticker": 0,
               "Value #A": 1,
               "Value #B": 2,
               "Value #C": 3,
@@ -830,10 +1019,10 @@
               "Value #E": 5,
               "Value #F": 6,
               "Value #G": 7,
-              "Value #H": 8
+              "Value #H": 8,
+              "ticker": 0
             },
             "renameByName": {
-              "ticker": "Ticker",
               "Value #A": "Shares",
               "Value #B": "Entry Price",
               "Value #C": "Current Price",
@@ -841,79 +1030,71 @@
               "Value #E": "P&L %",
               "Value #F": "Peak Price",
               "Value #G": "Trailing Stop",
-              "Value #H": "Rel Strength"
+              "Value #H": "Rel Strength",
+              "ticker": "Ticker"
             }
           }
         }
       ],
-      "description": "Open positions, sorted by relative strength vs. SPY (20-day return difference). Current price = value \u00f7 shares."
+      "type": "table"
     },
     {
-      "type": "row",
-      "title": "Performance",
-      "id": 10,
       "collapsed": false,
-      "panels": [],
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
-      }
+        "y": 24
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Performance",
+      "type": "row"
     },
     {
-      "type": "timeseries",
-      "title": "Portfolio Equity Curve",
-      "id": 11,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 15
-      },
-      "description": "Total portfolio value against the $5M starting baseline. Earnings dates are shown as annotations.",
+      "description": "Total portfolio value against the initial cash baseline. Earnings dates are shown as annotations.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
-          "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
           "custom": {
-            "lineWidth": 2,
             "fillOpacity": 15,
             "gradientMode": "opacity",
+            "lineWidth": 2,
             "showPoints": "never",
             "spanNulls": true
-          }
+          },
+          "decimals": 0,
+          "unit": "currencyUSD"
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "$5M Baseline"
+              "options": "Initial Cash"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
+                  "fixedColor": "text",
+                  "mode": "fixed"
                 }
               },
               {
                 "id": "custom.lineStyle",
                 "value": {
-                  "fill": "dash",
                   "dash": [
                     8,
                     6
-                  ]
+                  ],
+                  "fill": "dash"
                 }
               },
               {
@@ -925,9 +1106,39 @@
                 "value": 0
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SPY (rebased)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
           }
         ]
       },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 11,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -946,48 +1157,50 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_value",
-          "refId": "A",
-          "legendFormat": "Portfolio"
+          "legendFormat": "Portfolio",
+          "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "vector(5000000)",
-          "refId": "B",
-          "legendFormat": "$5M Baseline"
+          "expr": "vector($initial_cash)",
+          "legendFormat": "Initial Cash",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "$initial_cash * stock_price{ticker=\"SPY\"} / (stock_price{ticker=\"SPY\"} @ start())",
+          "legendFormat": "SPY (rebased)",
+          "refId": "C"
         }
-      ]
+      ],
+      "title": "Portfolio Equity Curve",
+      "type": "timeseries"
     },
     {
-      "type": "timeseries",
-      "title": "Price Drill-down (vs SPY)",
-      "id": 12,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 15
-      },
       "description": "Live prices for the tickers chosen in the Ticker variable, with SPY always shown as the benchmark.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
-          "decimals": 2,
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "lineWidth": 2,
             "fillOpacity": 0,
+            "lineWidth": 2,
             "showPoints": "never",
             "spanNulls": true
-          }
+          },
+          "decimals": 2,
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -999,32 +1212,39 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
+                  "fixedColor": "text",
+                  "mode": "fixed"
                 }
               },
               {
                 "id": "custom.lineStyle",
                 "value": {
-                  "fill": "dash",
                   "dash": [
                     8,
                     6
-                  ]
+                  ],
+                  "fill": "dash"
                 }
               }
             ]
           }
         ]
       },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 12,
       "options": {
         "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
           "calcs": [
             "lastNotNull"
-          ]
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
           "mode": "multi",
@@ -1037,35 +1257,28 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "stock_price{ticker=~\"(?i)(${ticker:pipe}|spy)\"}",
-          "refId": "A",
-          "legendFormat": "{{ticker}}"
+          "expr": "(stock_price{ticker=~\"(?i)(${ticker:pipe}|spy)\"} / (stock_price{ticker=~\"(?i)(${ticker:pipe}|spy)\"} @ start()) - 1) * 100",
+          "legendFormat": "{{ticker}}",
+          "refId": "A"
         }
       ],
-      "transformations": []
+      "title": "Price Drill-down (% change vs SPY)",
+      "transformations": [],
+      "type": "timeseries"
     },
     {
-      "type": "piechart",
-      "title": "Holdings Breakdown",
-      "id": 13,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
       "description": "How the portfolio is split across positions and cash.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
-          "decimals": 0,
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "decimals": 0,
+          "unit": "currencyUSD"
         },
         "overrides": [
           {
@@ -1077,27 +1290,26 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
+                  "fixedColor": "text",
+                  "mode": "fixed"
                 }
               }
             ]
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "id": 13,
       "options": {
-        "pieType": "donut",
         "displayLabels": [
           "name",
           "percent"
         ],
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
         "legend": {
           "displayMode": "table",
           "placement": "right",
@@ -1106,6 +1318,14 @@
             "value",
             "percent"
           ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
         "tooltip": {
           "mode": "single"
@@ -1117,11 +1337,11 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\"))",
-          "refId": "A",
-          "legendFormat": "{{ticker}}",
+          "expr": "sum by (ticker) (holding_value{ticker=~\"$ticker\"})",
           "instant": true,
-          "range": false
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "A"
         },
         {
           "datasource": {
@@ -1129,37 +1349,29 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_cash",
-          "refId": "B",
-          "legendFormat": "cash",
           "instant": true,
-          "range": false
+          "legendFormat": "cash",
+          "range": false,
+          "refId": "B"
         }
-      ]
+      ],
+      "title": "Holdings Breakdown",
+      "type": "piechart"
     },
     {
-      "type": "bargauge",
-      "title": "Relative Strength vs SPY",
-      "id": 14,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
       "description": "20-day return minus SPY's 20-day return, strongest first.",
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "decimals": 2,
-          "min": -10,
-          "max": 10,
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 2,
+          "max": 20,
+          "min": -20,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1176,26 +1388,34 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "suffix: pp"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "id": 14,
       "options": {
-        "orientation": "horizontal",
         "displayMode": "gradient",
-        "valueMode": "color",
-        "showUnfilled": true,
-        "namePlacement": "left",
-        "sizing": "auto",
-        "minVizHeight": 16,
         "maxVizHeight": 40,
+        "minVizHeight": 16,
+        "namePlacement": "left",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
           "fields": "",
           "values": false
-        }
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
       "targets": [
         {
@@ -1203,49 +1423,43 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sort_desc(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_rel_strength\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_rel_strength\")))",
-          "refId": "A",
-          "legendFormat": "{{ticker}}",
+          "expr": "sort_desc(sum by (ticker) (holding_rel_strength{ticker=~\"$ticker\"}))",
           "instant": true,
-          "range": false
+          "legendFormat": "{{ticker}}",
+          "range": false,
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Relative Strength vs SPY",
+      "type": "bargauge"
     },
     {
-      "type": "row",
-      "title": "Risk Monitoring",
-      "id": 15,
       "collapsed": false,
-      "panels": [],
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
-      }
+        "y": 47
+      },
+      "id": 15,
+      "panels": [],
+      "title": "Risk Monitoring",
+      "type": "row"
     },
     {
-      "type": "table",
-      "title": "Trailing Stop Status",
-      "id": 16,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 10,
-        "x": 0,
-        "y": 33
-      },
+      "description": "How far each price sits above its trailing stop. Red within 2%, orange within 5%. The stop arms once P&L reaches +5% and sits 8% below the peak.",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
-            "inspect": false,
             "cellOptions": {
               "type": "auto"
-            }
+            },
+            "inspect": false
           },
           "thresholds": {
             "mode": "absolute",
@@ -1341,8 +1555,8 @@
               {
                 "id": "color",
                 "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
+                  "fixedColor": "text",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -1383,14 +1597,14 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "-1": {
-                        "text": "Not armed",
                         "color": "transparent",
-                        "index": 0
+                        "index": 0,
+                        "text": "inactive"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -1406,13 +1620,13 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
-                        "text": "\u2014",
-                        "index": 0
+                        "index": 0,
+                        "text": "\u2014"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -1420,20 +1634,27 @@
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 0,
+        "y": 48
+      },
+      "id": 16,
       "options": {
-        "showHeader": true,
         "cellHeight": "md",
         "footer": {
-          "show": false,
+          "fields": "",
           "reducer": [
             "sum"
           ],
-          "fields": ""
+          "show": false
         },
+        "showHeader": true,
         "sortBy": [
           {
-            "displayName": "Room to Stop",
-            "desc": true
+            "desc": true,
+            "displayName": "Room to Stop"
           }
         ]
       },
@@ -1443,46 +1664,47 @@
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "(sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\")))",
-          "refId": "A",
+          "expr": "(sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"}))",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_peak_price\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_peak_price\"))",
-          "refId": "B",
+          "expr": "sum by (ticker) (holding_peak_price{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "B"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))",
-          "refId": "C",
+          "expr": "sum by (ticker) (holding_trailing_stop{ticker=~\"$ticker\"})",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "C"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "ag164tx65ph4wd"
           },
-          "expr": "((((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) - sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\"))) / (sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) * 100) and (sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_trailing_stop\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_trailing_stop\")) > 0)) or ((sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_value\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_value\")) / sum by (ticker) (label_replace({__name__=~\"holding_(${ticker:pipe})_shares\"}, \"ticker\", \"$1\", \"__name__\", \"holding_(.+)_shares\"))) * 0 - 1)",
-          "refId": "D",
+          "expr": "((((sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"})) - sum by (ticker) (holding_trailing_stop{ticker=~\"$ticker\"})) / (sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"})) * 100) and (sum by (ticker) (holding_trailing_stop{ticker=~\"$ticker\"}) > 0)) or ((sum by (ticker) (holding_value{ticker=~\"$ticker\"}) / sum by (ticker) (holding_shares{ticker=~\"$ticker\"})) * 0 - 1)",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "D"
         }
       ],
+      "title": "Trailing Stop Status",
       "transformations": [
         {
           "id": "merge",
@@ -1495,46 +1717,38 @@
               "Time": true
             },
             "indexByName": {
-              "ticker": 0,
               "Value #A": 1,
               "Value #B": 2,
               "Value #C": 3,
-              "Value #D": 4
+              "Value #D": 4,
+              "ticker": 0
             },
             "renameByName": {
-              "ticker": "Ticker",
               "Value #A": "Price",
               "Value #B": "Peak",
               "Value #C": "Stop",
-              "Value #D": "Room to Stop"
+              "Value #D": "Room to Stop",
+              "ticker": "Ticker"
             }
           }
         }
       ],
-      "description": "How far each price sits above its trailing stop. Red within 2%, orange within 5%. The stop arms once P&L reaches +5% and sits 8% below the peak."
+      "type": "table"
     },
     {
-      "type": "table",
-      "title": "Recent Trades",
-      "id": 17,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 9,
-        "x": 10,
-        "y": 33
-      },
+      "description": "Trade log from the trades exporter (job=trades).",
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
-            "inspect": false,
             "cellOptions": {
               "type": "auto"
-            }
+            },
+            "inspect": false
           },
           "thresholds": {
             "mode": "absolute",
@@ -1595,7 +1809,6 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "BUY": {
                         "color": "green",
@@ -1605,7 +1818,8 @@
                         "color": "red",
                         "index": 1
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               }
@@ -1613,20 +1827,27 @@
           }
         ]
       },
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 10,
+        "y": 48
+      },
+      "id": 17,
       "options": {
-        "showHeader": true,
         "cellHeight": "md",
         "footer": {
-          "show": false,
+          "fields": "",
           "reducer": [
             "sum"
           ],
-          "fields": ""
+          "show": false
         },
+        "showHeader": true,
         "sortBy": [
           {
-            "displayName": "Date",
-            "desc": true
+            "desc": true,
+            "displayName": "Date"
           }
         ]
       },
@@ -1637,12 +1858,13 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "trade_log",
-          "refId": "A",
+          "format": "table",
           "instant": true,
           "range": false,
-          "format": "table"
+          "refId": "A"
         }
       ],
+      "title": "Recent Trades",
       "transformations": [
         {
           "id": "organize",
@@ -1655,19 +1877,19 @@
               "job": true
             },
             "indexByName": {
-              "date": 0,
-              "ticker": 1,
               "action": 2,
-              "shares": 3,
+              "date": 0,
               "price": 4,
+              "shares": 3,
+              "ticker": 1,
               "value": 5
             },
             "renameByName": {
-              "date": "Date",
-              "ticker": "Ticker",
               "action": "Action",
-              "shares": "Shares",
+              "date": "Date",
               "price": "Price",
+              "shares": "Shares",
+              "ticker": "Ticker",
               "value": "Value"
             }
           }
@@ -1677,43 +1899,35 @@
           "options": {
             "conversions": [
               {
-                "targetField": "Shares",
-                "destinationType": "number"
+                "destinationType": "number",
+                "targetField": "Shares"
               },
               {
-                "targetField": "Price",
-                "destinationType": "number"
+                "destinationType": "number",
+                "targetField": "Price"
               },
               {
-                "targetField": "Value",
-                "destinationType": "number"
+                "destinationType": "number",
+                "targetField": "Value"
               }
             ]
           }
         }
       ],
-      "description": "Trade log from the trades exporter (job=trades)."
+      "type": "table"
     },
     {
-      "type": "stat",
-      "title": "SPY Benchmark",
-      "id": 18,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 19,
-        "y": 33
-      },
+      "description": "SPY price, with % change over the selected time range for comparison with ROI.",
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1723,11 +1937,22 @@
               }
             ]
           },
-          "decimals": 2
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 48
+      },
+      "id": 18,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1735,13 +1960,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "area",
+        "showPercentChange": true,
         "textMode": "value",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": true
+        "wideLayout": true
       },
       "targets": [
         {
@@ -1750,29 +1971,21 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "stock_price{ticker=\"SPY\"}",
-          "refId": "A",
-          "legendFormat": "SPY"
+          "legendFormat": "SPY",
+          "refId": "A"
         }
       ],
-      "description": "SPY price, with % change over the selected time range for comparison with ROI."
+      "title": "SPY Benchmark",
+      "type": "stat"
     },
     {
-      "type": "stat",
-      "title": "Total Trades",
-      "id": 19,
       "datasource": {
         "type": "prometheus",
         "uid": "ag164tx65ph4wd"
       },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 19,
-        "y": 37
-      },
+      "description": "Number of trades executed so far.",
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
           "color": {
             "mode": "thresholds"
           },
@@ -1784,11 +1997,23 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "none"
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 52
+      },
+      "id": 19,
       "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1796,13 +2021,9 @@
           "fields": "",
           "values": false
         },
-        "colorMode": "value",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "wideLayout": true,
-        "showPercentChange": false
+        "wideLayout": true
       },
       "targets": [
         {
@@ -1811,12 +2032,279 @@
             "uid": "ag164tx65ph4wd"
           },
           "expr": "portfolio_trade_count",
-          "refId": "A",
-          "legendFormat": "Trades"
+          "legendFormat": "Trades",
+          "refId": "A"
         }
       ],
-      "description": "Number of trades executed so far."
+      "title": "Total Trades",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "suffix: pp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 42
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "(portfolio_value / (portfolio_value @ start()) - 1) * 100 - on() (stock_price{ticker=\"SPY\"} / (stock_price{ticker=\"SPY\"} @ start()) - 1) * 100",
+          "legendFormat": "Alpha vs SPY (pp, over range)",
+          "refId": "A"
+        }
+      ],
+      "title": "Alpha vs SPY (pp, over range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": -0.05
+              },
+              {
+                "color": "green",
+                "value": -0.01
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 42
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_value / max_over_time(portfolio_value[$__range]) - 1",
+          "legendFormat": "Current Drawdown",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Drawdown",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ag164tx65ph4wd"
+      },
+      "description": "Total portfolio value against the initial cash baseline. Earnings dates are shown as annotations.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 2,
+          "max": 0,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ag164tx65ph4wd"
+          },
+          "expr": "portfolio_value / max_over_time(portfolio_value[$__range]) - 1",
+          "legendFormat": "Drawdown",
+          "refId": "A"
+        }
+      ],
+      "title": "Drawdown from Peak",
+      "type": "timeseries"
     }
   ],
-  "id": null
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "mock-stock",
+    "challenge"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "ag164tx65ph4wd"
+        },
+        "definition": "label_values(holding_shares, ticker)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Ticker",
+        "multi": true,
+        "name": "ticker",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(holding_shares, ticker)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "5000000",
+          "value": "5000000"
+        },
+        "hide": 0,
+        "label": "Initial Cash",
+        "name": "initial_cash",
+        "options": [
+          {
+            "selected": true,
+            "text": "5000000",
+            "value": "5000000"
+          }
+        ],
+        "query": "5000000",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Mock Stock Challenge",
+  "uid": "mock-stock-challenge",
+  "version": 16
 }
