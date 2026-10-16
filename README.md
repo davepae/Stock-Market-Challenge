@@ -7,13 +7,15 @@ the S&P 500. No real money is ever involved.
 
 ## Features
 
-> **Starting budget:** $5,000,000 (updated from $50,000).
+> **Starting budget:** $5,000,000 of paper money.
 
 - **News monitoring** - headline scanning and sentiment scoring, cached locally.
 - **Technical analysis** - moving averages, RSI, momentum and relative strength vs. SPY (via yfinance).
-- **Risk management** - stop losses and position sizing; long-only, no shorting, options or margin, cash never negative.
+- **Diversified portfolio** - up to 10 positions (`MAX_POSITIONS`), at most 18% of the portfolio in any one, with a 5% cash reserve.
+- **Risk management** - volatility-based stop losses (3 x weekly volatility, clamped to 5-15% below entry) and a trailing stop that arms once a position is 5% up and sells 8% below its peak, never below breakeven. No take-profit cap: winners run. Long-only, no shorting, options or margin, cash never negative.
 - **Earnings avoidance** - holdings are exited and buys skipped within 3 trading days of earnings (`EARNINGS_EXIT_DAYS`).
-- **Monitoring** - Prometheus metrics and a provisioned Grafana dashboard.
+- **Monitoring** - Prometheus exporters (portfolio :8081, prices :8080, trades :8082) and a provisioned Grafana dashboard.
+- **Tests** - a pytest suite covering the core trading logic (see [Running the tests](#running-the-tests)).
 
 ## Dashboard Preview
 
@@ -31,6 +33,8 @@ the S&P 500. No real money is ever involved.
 | Other exporters | `app/exporters/` | Prices on :8080, trade table on :8082 |
 | Monitoring stack | `prometheus.yml`, `monitoring/` | Prometheus scrapes the exporters; Grafana dashboard visualises them |
 | Config | `app/config.py` | All tunable constants (universe, stops, thresholds) |
+| Tests | `app/tests/` | pytest suite (`app/requirements-dev.txt` adds pytest) |
+| Installer | `install.sh`, `verify.sh` | One-step install and PASS/FAIL check |
 
 The portfolio is rebuilt from `trades.csv` (`date,ticker,action,shares,price`)
 on every cycle.
@@ -58,6 +62,13 @@ python log_trade.py AAPL BUY 10 200.00      # log a trade manually
 Grafana: `http://<pi-address>:3000` (initial login `admin` / `admin`) ->
 Dashboards -> **Mock Stock Challenge**. Rules and strategy are in
 [app/USER_GUIDE.md](app/USER_GUIDE.md).
+
+## Running the tests
+
+```bash
+pip install -r app/requirements-dev.txt
+cd app && python -m pytest tests
+```
 
 ## Disclaimer
 
