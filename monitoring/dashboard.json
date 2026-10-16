@@ -142,7 +142,7 @@
               },
               {
                 "color": "green",
-                "value": 55000
+                "value": 5500000
               }
             ]
           }
@@ -176,7 +176,7 @@
           "legendFormat": "Total"
         }
       ],
-      "description": "Total portfolio value. Green > $55K, yellow $50\u201355K, red < $50K."
+      "description": "Total portfolio value. Green > $5.5M, yellow $5\u20135.5M, red < $5M."
     },
     {
       "type": "stat",
@@ -247,7 +247,7 @@
                     },
                     {
                       "color": "green",
-                      "value": 2500.0
+                      "value": 250000.0
                     }
                   ]
                 }
@@ -292,7 +292,7 @@
           "legendFormat": "P&L $"
         }
       ],
-      "description": "Return vs. $50K starting cash, as a percent and in dollars. Green > 5%, yellow 0\u20135%, red < 0%."
+      "description": "Return vs. $5M starting cash, as a percent and in dollars. Green > 5%, yellow 0\u20135%, red < 0%."
     },
     {
       "type": "stat",
@@ -875,7 +875,7 @@
         "x": 0,
         "y": 15
       },
-      "description": "Total portfolio value against the $50K starting baseline. Earnings dates are shown as annotations.",
+      "description": "Total portfolio value against the $5M starting baseline. Earnings dates are shown as annotations.",
       "fieldConfig": {
         "defaults": {
           "unit": "currencyUSD",
@@ -896,7 +896,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "$50K Baseline"
+              "options": "$5M Baseline"
             },
             "properties": [
               {
@@ -956,7 +956,7 @@
           },
           "expr": "vector(5000000)",
           "refId": "B",
-          "legendFormat": "$50K Baseline"
+          "legendFormat": "$5M Baseline"
         }
       ]
     },
