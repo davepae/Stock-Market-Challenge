@@ -246,6 +246,13 @@ def render_metrics(snap: dict[str, Any], rel_str: dict[str, float], price_stale:
         for s in held:
             if key in s:
                 g.labels(ticker=s["ticker"].lower()).set(s[key])
+    for name, key, help_text in (("ticker_pnl_pct", "unrealized_pnl_pct", "Unrealized P&L of held tickers in percent"),
+                                 ("ticker_shares", "shares", "Shares held per ticker"),
+                                 ("ticker_entry_price", "entry_price", "Average entry price per ticker"),
+                                 ("ticker_current_price", "current_price", "Current price per ticker")):
+        g = gauge(name, help_text, ("ticker",))
+        for h in snap["holdings"]:
+            g.labels(ticker=h["ticker"].lower()).set(h[key])  # lower-case to join with ticker_score
     g = gauge("ticker_reason", "Top reasons for each held ticker's recommendation", ("ticker", "reason"))
     for s in held:
         reason = "; ".join(s.get("reasons", [])[:3])[:100].replace("\n", " ")
